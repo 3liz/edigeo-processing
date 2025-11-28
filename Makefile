@@ -25,7 +25,9 @@ requirements/%.txt: pyproject.toml
 		--only-group $* \
 		-q -o $@
 
+
 test:
+	rm -rf tests/__output__/*
 	pytest tests
 
 lint::

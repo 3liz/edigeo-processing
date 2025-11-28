@@ -24,6 +24,18 @@ def rootdir(request: pytest.FixtureRequest) -> Path:
     return request.config.rootpath
 
 
+@pytest.fixture(scope="session")
+def data(rootdir: Path) -> Path:
+    return rootdir.joinpath("data")
+
+
+@pytest.fixture(scope="session")
+def output_dir(rootdir: Path) -> Path:
+    outdir = rootdir.joinpath("__output__")
+    outdir.mkdir(exist_ok=True)
+    return outdir
+
+
 @pytest.fixture(autouse=True, scope="session")
 def plugin(
     rootdir: Path,
@@ -42,13 +54,13 @@ def pytest_sessionstart(session: pytest.Session):
 
 
 def _install_logger_hook():
-    """ Install message log hook
-    """
+    """Install message log hook"""
     logging.debug("Installing logger hook")
     from qgis.core import Qgis, QgsApplication
+
     # Add a hook to qgis  message log
     def writelogmessage(message, tag, level):
-        arg = '{}: {}'.format( tag, message )
+        arg = "{}: {}".format(tag, message)
         if level == Qgis.Warning:
             logging.warning(arg)
         elif level == Qgis.Critical:
@@ -58,20 +70,19 @@ def _install_logger_hook():
             logging.debug(arg)
 
     messageLog = QgsApplication.messageLog()
-    messageLog.messageReceived.connect( writelogmessage )
+    messageLog.messageReceived.connect(writelogmessage)
 
 
 def _load_plugin(plugin_path: Path, iface: QgisInterface) -> Any:
-
     logging.info("Loading plugin: %s", plugin_path)
 
     cp = configparser.ConfigParser()
     with plugin_path.joinpath("metadata.txt").open() as f:
         cp.read_file(f)
-        assert cp['general'].getboolean('hasProcessingProvider')
+        assert cp["general"].getboolean("hasProcessingProvider")
         assert _check_qgis_version(
-            cp['general'].get('qgisMinimumVersion'),
-            cp['general'].get('qgisMaximumVersion'),
+            cp["general"].get("qgisMinimumVersion"),
+            cp["general"].get("qgisMaximumVersion"),
         )
 
     sys.path.append(str(plugin_path.parent))
@@ -88,21 +99,19 @@ def _load_plugin(plugin_path: Path, iface: QgisInterface) -> Any:
 
 
 def _check_qgis_version(minver: Optional[str], maxver: Optional[str]) -> bool:
-    version = semver.Version.parse(Qgis.QGIS_VERSION.split('-', maxsplit=1)[0])
+    version = semver.Version.parse(Qgis.QGIS_VERSION.split("-", maxsplit=1)[0])
 
     def _version(ver: Optional[str]) -> semver.Version:
         if not ver:
             return version
 
         # Normalize version
-        parts = ver.split('.')
+        parts = ver.split(".")
         match len(parts):
             case 1:
-                parts.extend(("0","0"))
+                parts.extend(("0", "0"))
             case 2:
                 parts.append("0")
         return semver.Version.parse(".".join(parts))
 
     return _version(minver) <= version <= _version(maxver)
-
-

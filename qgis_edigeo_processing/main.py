@@ -1,4 +1,3 @@
-
 from typing import (
     Optional,
 )
@@ -6,20 +5,22 @@ from typing import (
 from qgis.core import QgsApplication
 from qgis.gui import QgisInterface
 
+from . import utils
 from .provider import Provider
 
 
 class Plugin:
-
     def __init__(self, iface: QgisInterface):
         self.provider: Optional[Provider] = None
+        utils.log("Initializing EDIGEO processing plugin")
 
     def initGui(self):
-        pass
+        self.initProcessing()
 
     def initProcessing(self):
         # Create the provider(s)
         # NOTE: keep a reference to the provider
+        utils.log("Registering EDIGEO processing provider")
         self.provider = Provider()
         # And register it
         QgsApplication.processingRegistry().addProvider(self.provider)
@@ -27,4 +28,3 @@ class Plugin:
     def unload(self):
         if self.provider:
             QgsApplication.processingRegistry().removeProvider(self.provider)
-

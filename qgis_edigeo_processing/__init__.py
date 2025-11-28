@@ -1,4 +1,3 @@
-
 from qgis.gui import QgisInterface
 
 from .main import Plugin
