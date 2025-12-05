@@ -51,5 +51,4 @@ format-diff:
 	ruff format --diff
 
 typecheck:
-	mypy  .
-
+	mypy .

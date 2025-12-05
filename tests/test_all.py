@@ -1,7 +1,11 @@
 from pathlib import Path
 from typing import Any
 
-from qgis.core import QgsApplication, QgsProcessingContext
+from qgis.core import (
+    QgsApplication,
+    QgsProcessingContext,
+    QgsProcessingFeedback,
+)
 
 
 def test_resources():
@@ -39,3 +43,33 @@ def test_html_report(plugin: Any, data: Path, output_dir: Path):
 
     with html_output.open() as f:
         print("\n::test_inspect::", f.read())
+
+
+def test_export(plugin: Any, data: Path, output_dir: Path):
+    # Test HTML reporting
+    from qgis import processing
+
+    class Feedback(QgsProcessingFeedback):
+        def reportError(self, msg: str, fatalError: bool = False):
+            print("\n::test_export::error", msg)
+
+    context = QgsProcessingContext()
+    context.setTemporaryFolder(str(output_dir))
+
+    result = processing.run(
+        "edigeo:export",
+        {
+            "file": str(data.joinpath("75103000AO01", "E000AO01.THF")),
+            "folder": str(output_dir),
+            "add": False,
+        },
+        context=context,
+        feedback=Feedback(),
+    )
+
+    outputs = result.get("layers")
+    print("\n::test_export::", outputs)
+    for layer in outputs:
+        path = Path(layer)
+        assert path.exists()
+        assert path.is_relative_to(output_dir)

@@ -1,3 +1,5 @@
+import traceback
+
 from pathlib import Path
 from textwrap import dedent
 from typing import (
@@ -12,6 +14,9 @@ from edigeo import ValidationMode, WriteOptions
 from edigeo.extras import read_from_archive
 from edigeo.types import Ring
 from qgis.core import (
+    Qgis,
+    QgsGeometry,
+    QgsPointXY,
     QgsProcessingAlgorithm,
     QgsProcessingContext,
     QgsProcessingException,
@@ -100,7 +105,66 @@ class EdigeoExport(QgsProcessingAlgorithm):
             rings: Sequence[Ring],
             face: str,
         ) -> Sequence[Ring]:
-            return rings
+            # Ideally, we should use the make_valid method from Geos/Shapely but:
+            # 1. The 'structure' method is only available from Shapely 2.1
+            # which is only available since Debian 'trixie'
+            # 2. It is a pain to build an invalid polygon using QgsGeometry for
+            # applying make_valid
+            #
+            # So let's cook a homemade recipy for validating rings
+            try:
+                # Build geometries for all rings
+                error = False
+                geoms: list[QgsGeometry] = []
+                for ring, _ in rings:
+                    geom = QgsGeometry()
+                    result = geom.addPointsXYV2(
+                        [QgsPointXY(x, y) for (x, y) in ring],
+                        Qgis.WkbType.Polygon,
+                    )
+                    geom.convertToSingleType()
+                    assert not geom.isMultipart()
+                    if result != Qgis.GeometryOperationResult.Success:
+                        feedback.reportError(f"Geometry operation failed with error {result}")
+                        # Return a multipolygon
+                        error = True
+                        break
+
+                    geoms.append(geom)
+
+                if not error:
+                    # Order by area size in descending order
+                    geoms.sort(key=lambda g: g.area(), reverse=True)
+
+                    roots = [geoms[0]]
+                    for g in geoms[1:]:
+                        for root in roots:
+                            if g.intersects(root):
+                                result = root.addRing(g.asPolygon()[0])
+                                if result != Qgis.GeometryOperationResult.Success:
+                                    feedback.reportError(f"Geometry operation failed with error {result}")
+                                    error = True
+                                break
+                        else:
+                            # Add as a root
+                            roots.append(g)
+                        if error:
+                            break
+
+                if error:
+                    return [(ring, True) for ring, _ in rings]
+
+                rings = []
+                for root in roots:
+                    outer = True
+                    for lines in root.asPolygon():
+                        rings.append(([(x, y) for x, y in lines], outer))
+                        outer = False
+
+                return rings
+            except Exception:
+                traceback.print_exc()
+                raise
 
         output_layers = []
 
