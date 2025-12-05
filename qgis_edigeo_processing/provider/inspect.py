@@ -19,6 +19,7 @@ from qgis.core import (
     QgsProcessingOutputHtml,
     QgsProcessingParameterDefinition,
     QgsProcessingParameterFile,
+    QgsProcessingParameterFolderDestination,
 )
 
 from .. import utils
@@ -27,6 +28,8 @@ from .json2html import json2html
 
 class EdigeoInspect(QgsProcessingAlgorithm):
     INPUT_FILE = "file"
+    OUTPUT_FOLDER = "folder"
+
     OUTPUT_HTML = "html"
 
     def initAlgorithm(self, config: Optional[dict] = None):
@@ -37,16 +40,26 @@ class EdigeoInspect(QgsProcessingAlgorithm):
                 "Edigeo archive or file",
                 fileFilter="TAR archive (*.tar.bz2);;THF file (*.THF)",
             ),
-            "Selectionne un fichier .THF ou une archive TAR",
+            "Sélectionne un fichier .THF ou une archive TAR",
+        )
+
+        # Output folder
+        self._add_parameter(
+            QgsProcessingParameterFolderDestination(
+                self.OUTPUT_FOLDER,
+                "Dossier de destination",
+            ),
+            "Dossier d'export des fichier",
         )
 
         # Output HTML
         self.addOutput(
             QgsProcessingOutputHtml(
                 self.OUTPUT_HTML,
-                "Html EDIGEO report",
+                "Report EDIGEO Html",
             ),
         )
+
 
     def _add_parameter(
         self,
@@ -65,6 +78,10 @@ class EdigeoInspect(QgsProcessingAlgorithm):
         file = Path(self.parameterAsFile(parameters, self.INPUT_FILE, context))
         if not file.is_file():
             raise QgsProcessingException(f"Ficher invalide {file}")
+
+        output_dir = Path(self.parameterAsString(parameters, self.OUTPUT_FOLDER, context))
+        if not output_dir.is_dir():
+            raise QgsProcessingAlgorithm(f"Repertoire invalide {output_dir}")
 
         parser = read_from_archive(file)
 
@@ -97,7 +114,7 @@ class EdigeoInspect(QgsProcessingAlgorithm):
                     errors.append(
                         {
                             "rid": feat.id,
-                            "face": "",
+                            "face": pfe,
                             "status": "Invalid",
                             "arc": "",
                         }
@@ -105,15 +122,10 @@ class EdigeoInspect(QgsProcessingAlgorithm):
 
         report = create_report(parser, edigeo.ValidationMode.Trust, inspect)
 
-        temporary_folder = context.temporaryFolder()
-        if not temporary_folder:
-            # Temporary folder is not set
-            from tempfile import mkdtemp
+        html_output = Path(output_dir).joinpath(f"{file.stem}-report.html")
 
-            temporary_folder = mkdtemp()
-
-        html_output = Path(temporary_folder).joinpath(f"{file.stem}-report.html")
         utils.log(f"Writing EDIGEO report to {html_output}")
+
         with html_output.open("w") as out:
             name = report["name"]
             extent = ", ".join(f"{x:.6f}" for x in report["extent"])

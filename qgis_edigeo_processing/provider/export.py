@@ -52,9 +52,9 @@ class EdigeoExport(QgsProcessingAlgorithm):
         self._add_parameter(
             QgsProcessingParameterFolderDestination(
                 self.OUTPUT_FOLDER,
-                "Output directory",
+                "Dossier de destination",
             ),
-            "Folder to export output files",
+            "Dossier d'export des fichierl",
         )
 
         # Add to project ?
