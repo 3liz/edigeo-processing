@@ -114,7 +114,7 @@ class EdigeoInspect(QgsProcessingAlgorithm):
                     errors.append(
                         {
                             "rid": feat.id,
-                            "face": pfe,
+                            "face": "",
                             "status": "Invalid",
                             "arc": "",
                         }

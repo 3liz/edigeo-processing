@@ -1,5 +1,6 @@
 import traceback
 
+from functools import cache
 from pathlib import Path
 from textwrap import dedent
 from typing import (
@@ -113,8 +114,7 @@ class EdigeoExport(QgsProcessingAlgorithm):
             #
             # So let's cook a homemade recipy for validating rings
             try:
-                # Build geometries for all rings
-                error = False
+                # Convert each ring to QgsGeometry (Polygon)
                 geoms: list[QgsGeometry] = []
                 for ring, _ in rings:
                     geom = QgsGeometry()
@@ -122,37 +122,37 @@ class EdigeoExport(QgsProcessingAlgorithm):
                         [QgsPointXY(x, y) for (x, y) in ring],
                         Qgis.WkbType.Polygon,
                     )
-                    geom.convertToSingleType()
-                    assert not geom.isMultipart()
                     if result != Qgis.GeometryOperationResult.Success:
-                        feedback.reportError(f"Geometry operation failed with error {result}")
-                        # Return a multipolygon
-                        error = True
-                        break
+                        feedback.reportError(
+                            f"{feat.id}/{face}: Geometry operation "
+                            f"failed with error {result}"
+                        )
+                    else:
+                        geom.convertToSingleType()
+                        geoms.append(geom)
 
-                    geoms.append(geom)
+                @cache
+                def area(g: QgsGeometry) -> float:
+                    return g.area()
 
-                if not error:
-                    # Order by area size in descending order
-                    geoms.sort(key=lambda g: g.area(), reverse=True)
+                # Order by area size in descending order (largest first)
+                geoms.sort(key=lambda g: area(g), reverse=True)
 
-                    roots = [geoms[0]]
-                    for g in geoms[1:]:
-                        for root in roots:
-                            if g.intersects(root):
-                                result = root.addRing(g.asPolygon()[0])
-                                if result != Qgis.GeometryOperationResult.Success:
-                                    feedback.reportError(f"Geometry operation failed with error {result}")
-                                    error = True
-                                break
-                        else:
-                            # Add as a root
-                            roots.append(g)
-                        if error:
+                roots = [geoms[0]]
+                # For eech ring check if it intersect a root
+                # - if yes: add it as an inner ring of the root
+                # - if no: add it as new root
+                for g in geoms[1:]:
+                    for root in roots:
+                        if g.intersects(root):
+                            result = root.addRing(g.asPolygon()[0])
+                            if result != Qgis.GeometryOperationResult.Success:
+                                # hum, it intersects a root but is not a child, drop it
+                                feedback.reportError(f"Geometry operation failed with error {result}")
                             break
-
-                if error:
-                    return [(ring, True) for ring, _ in rings]
+                    else:
+                        # Add as a root
+                        roots.append(g)
 
                 rings = []
                 for root in roots:

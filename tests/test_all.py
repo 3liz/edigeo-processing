@@ -29,11 +29,12 @@ def test_html_report(plugin: Any, data: Path, output_dir: Path):
 
     context = QgsProcessingContext()
     context.setTemporaryFolder(str(output_dir))
-
+    
     result = processing.run(
         "edigeo:inspect",
         {
             "file": str(data.joinpath("75103000AO01", "E000AO01.THF")),
+            "folder": str(output_dir),
         },
         context=context,
     )
