@@ -1,0 +1,104 @@
+variables:
+  PRODUCT_NAME: edigeo_processing
+
+stages:
+  - version
+  - build
+  - deploy
+  - deploy2
+  - deploy3
+
+version:
+  image: $REGISTRY_URI/factory-ci-runner:qgis-plugin-ci
+  stage: version
+  script:
+    - echo "VERSION=`make version`" > build.env
+    - echo "STATUS=`make status`" >> build.env
+    - cat build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+  tags:
+    - factory-plain
+
+build:
+  image: $REGISTRY_URI/factory-ci-runner:qgis-plugin-ci
+  stage: build
+  dependencies:
+    - version
+  script:
+    - echo "Building plugin ${PRODUCT_NAME}  VERSION=${VERSION} STATUS=${STATUS}"
+    - >
+      qgis-plugin-ci
+      package ${VERSION}
+      --plugin-repo-url https://packages.3liz.org/pub/${PRODUCT_NAME}/${STATUS}/
+  artifacts:
+    untracked: true
+    expose_as: "QGIS package"
+    paths:
+      - ${PRODUCT_NAME}.${VERSION}.zip
+      - plugins.xml
+  tags:
+    - factory-plain
+
+#
+# TODO: We need to go forth and back between two images, 
+# for push a local repository, this must be simplified 
+# to one call
+#
+
+deploy:
+  image: $REGISTRY_URI/factory-ci-runner:fabric-ci
+  stage: deploy
+  dependencies:
+    - version
+    - build
+  script:
+    # Upload into the plugin directory
+    - echo "Uploading plugin ${PRODUCT_NAME}  VERSION=${VERSION} STATUS=${STATUS}"
+    - upload_to_packages_server ${PRODUCT_NAME}.${VERSION}.zip pub/${PRODUCT_NAME}-qgis-plugin/${STATUS}/
+    - upload_to_packages_server plugins.xml pub/${PRODUCT_NAME}-qgis-plugin/${STATUS}/
+
+    # Fetch XML files
+    # This is dumb: it pull all the repository without taking into-account the versions
+    - mkdir tmp_repository
+    - pull_folder_from_packages_server pub/server-plugins-repository/${STATUS}/ tmp_repository
+
+    # This CI job is running as "fabric" user, the next job is "factory"
+    - chmod 777 -R tmp_repository/
+  tags:
+    - fabric
+  artifacts:
+    paths:
+      - tmp_repository/*.xml
+
+edit-repository:
+  image: $REGISTRY_URI/factory-ci-runner:factory-ci
+  stage: deploy2
+  dependencies:
+    - build
+    - deploy
+  before_script:
+    - source ~/.bashrc 
+    - pip3 install qgis-plugin-repo
+  script:
+    - qgis-plugin-repo merge plugins.xml tmp_repository/*.xml
+  tags:
+    - factory-plain
+  artifacts:
+    untracked: true
+    paths:
+      - tmp_repository/*.xml
+
+push-repository-xml:
+  image: $REGISTRY_URI/factory-ci-runner:fabric-ci
+  stage: deploy3
+  dependencies:
+    - version
+    - edit-repository
+  script:
+    - upload_folder_to_packages_server tmp_repository/ pub/server-plugins-repository/${STATUS}/
+  tags:
+    - fabric
+
+

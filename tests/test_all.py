@@ -29,7 +29,7 @@ def test_html_report(plugin: Any, data: Path, output_dir: Path):
 
     context = QgsProcessingContext()
     context.setTemporaryFolder(str(output_dir))
-    
+
     result = processing.run(
         "edigeo:inspect",
         {

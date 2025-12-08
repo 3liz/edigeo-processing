@@ -13,7 +13,7 @@ pluggy==1.6.0
 pygments==2.19.2
 pytest==9.0.1
 pytest-qgis==2.1.0
-ruff==0.14.7
+ruff==0.14.8
 semver==3.0.4
 tomli==2.3.0 ; python_full_version <= '3.11'
 typing-extensions==4.15.0

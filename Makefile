@@ -5,6 +5,7 @@ SHELL:=bash
 
 REQUIREMENTS_GROUPS= \
 	dev \
+	ci \
 	tests \
 	lint \
 	packaging \
@@ -16,7 +17,7 @@ REQUIREMENTS=$(patsubst %, requirements/%.txt, $(REQUIREMENTS_GROUPS))
 
 update-requirements: $(REQUIREMENTS)
 
-requirements/%.txt: pyproject.toml
+requirements/%.txt: uv.lock
 	@echo "Updating requirements for '$*'"; \
 	uv export --format requirements.txt \
 		--no-annotate \
@@ -52,3 +53,32 @@ format-diff:
 
 typecheck:
 	mypy .
+
+version-%:
+	@echo `uv version --short`+$*
+
+version-prereleas-%:
+	@echo `uv version --short`-$*
+
+version-release:
+	@uv version --short
+
+STATUS:=unstable
+
+ifeq ($(shell echo $(CI_COMMIT_TAG) | head -c 8), release-)
+VERSION_BUMP=release
+STATUS:=stable
+else
+VERSION_BUMP=dev
+endif
+
+version: version-$(VERSION_BUMP)
+
+status:
+	@echo $(STATUS)
+
+echo-var-%:
+	@echo $($*)
+
+
+
