@@ -5,7 +5,6 @@ SHELL:=bash
 
 REQUIREMENTS_GROUPS= \
 	dev \
-	ci \
 	tests \
 	lint \
 	packaging \
@@ -57,7 +56,7 @@ typecheck:
 version-%:
 	@echo `uv version --short`+$*
 
-version-prereleas-%:
+version-prerelease-%:
 	@echo `uv version --short`-$*
 
 version-release:
@@ -69,7 +68,7 @@ ifeq ($(shell echo $(CI_COMMIT_TAG) | head -c 8), release-)
 VERSION_BUMP=release
 STATUS:=stable
 else
-VERSION_BUMP=dev
+VERSION_BUMP=alpha
 endif
 
 version: version-$(VERSION_BUMP)

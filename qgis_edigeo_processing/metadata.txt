@@ -2,24 +2,23 @@
 name=Edigeo-processing
 qgisMinimumVersion=3.34
 qgisMaximumVersion=3.99
-author=3Liz
-email=info@3liz.com
-description=EDIGEO file reader
 about="Allow inspect, import and export edigeo datasource."
 category=Plugins
 hasProcessingProvider=yes
-tags=processing,edigeo,cadastre,pci
-
-homepage=https://github.com/3liz/qgis-edigeo-processing
-tracker=https://github.com/3liz/qgis-edigeo-processing/issues
-reopository=https://github.com/3liz/qgis-edigeo-processing
 
 # Done automatically by qgis-plugin-package-ci
-version=dev
-commitNumber=
-commitSha1=
-dateTime=
-changelog=
+#homepage=
+#tracker=
+#repository=
+#tags=
+#author=
+#email=
+#description=
+#version=dev
+#commitNumber=
+#commitSha1=
+#dateTime=
+#changelog=
 # End of qgis-plugin-ci
 
 icon=resources/icons/icon.png

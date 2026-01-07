@@ -3,8 +3,9 @@ name = "qgis-edigeo-processing"
 authors = [
     { name = "3liz", email = "info@3liz.com" } 
 ]
+description="Edigeo file reader"
 requires-python = ">=3.10"
-keywords = ["QGIS", "processing", "plugin"]
+keywords = ["processing", "edigeo", "cadastre", "pci"]
 license = {text = "MIT"}
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -18,7 +19,7 @@ version = "0.1.0"
 [project.urls]
 homepage = "https://github.com/3liz/qgis-edigeo-processing"
 repository = "https://github.com/3liz/qgis-edigeo-processing"
-
+tracker = "https://github.com/3liz/qgis-edigeo-processing/issues"
 
 [dependency-groups]
 dev = [
@@ -51,6 +52,7 @@ qgis-plugin-package-ci = { git = "https://github.com/3liz/qgis-plugin-package-ci
 plugin_source = "qgis_edigeo_processing"
 github_organization_slug = "3liz"
 project_slug = "qgis-edigeo-processing"
+
 
 #
 # Ruff

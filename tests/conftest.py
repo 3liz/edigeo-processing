@@ -1,6 +1,3 @@
-#
-# Logger hook
-#
 import configparser
 import importlib
 import logging
