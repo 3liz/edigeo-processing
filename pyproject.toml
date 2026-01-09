@@ -17,9 +17,9 @@ classifiers = [
 version = "0.1.0"
 
 [project.urls]
-homepage = "https://github.com/3liz/qgis-edigeo-processing"
-repository = "https://github.com/3liz/qgis-edigeo-processing"
-tracker = "https://github.com/3liz/qgis-edigeo-processing/issues"
+homepage = "https://projects.3liz.org/recherche-et-developpement/qgis-edigeo-processing-plugin"
+repository = "https://projects.3liz.org/recherche-et-developpement/qgis-edigeo-processing-plugin"
+tracker = "https://projects.3liz.org/recherche-et-developpement/qgis-edigeo-processing-plugin/issues"
 
 [dependency-groups]
 dev = [
