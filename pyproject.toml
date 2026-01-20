@@ -43,6 +43,7 @@ packaging = [
 
 [tool.uv.sources]
 qgis-plugin-package-ci = { git = "https://github.com/3liz/qgis-plugin-package-ci.git" }
+pytest-qgis = { git = "https://github.com/3liz/pytest-qgis.git" }
 
 #
 # Package ci

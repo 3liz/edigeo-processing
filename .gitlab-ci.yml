@@ -26,16 +26,12 @@ build:
     - version
   script:
     - echo "Building plugin ${PRODUCT_NAME}  VERSION=${VERSION} STATUS=${STATUS}"
-    - >
-      qgis-plugin-ci
-      package ${VERSION}
-      --plugin-repo-url https://packages.3liz.org/pub/${PRODUCT_NAME}/${STATUS}/
+    - qgis-plugin-ci package ${VERSION}
   artifacts:
     untracked: true
     expose_as: "QGIS package"
     paths:
       - ${PRODUCT_NAME}.${VERSION}.zip
-      - plugins.xml
   tags:
     - factory-plain
 
