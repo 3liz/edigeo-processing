@@ -7,7 +7,6 @@ REQUIREMENTS_GROUPS= \
 	dev \
 	tests \
 	lint \
-	packaging \
 	$(NULL)
 
 .PHONY: update-requirements 
@@ -25,6 +24,8 @@ requirements/%.txt: uv.lock
 		--only-group $* \
 		-q -o $@
 
+version:
+	@echo `uv version --short`
 
 test:
 	rm -rf tests/__output__/*
@@ -52,29 +53,6 @@ format-diff:
 
 typecheck:
 	mypy .
-
-version-%:
-	@echo `uv version --short`+$*
-
-version-prerelease-%:
-	@echo `uv version --short`-$*
-
-version-release:
-	@uv version --short
-
-STATUS:=unstable
-
-ifeq ($(shell echo $(CI_COMMIT_TAG) | head -c 8), release-)
-VERSION_BUMP=release
-STATUS:=stable
-else
-VERSION_BUMP=alpha
-endif
-
-version: version-$(VERSION_BUMP)
-
-status:
-	@echo $(STATUS)
 
 echo-var-%:
 	@echo $($*)

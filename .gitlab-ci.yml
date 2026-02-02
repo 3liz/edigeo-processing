@@ -2,36 +2,32 @@ variables:
   PRODUCT_NAME: edigeo_processing
 
 stages:
-  - version
   - build
   - deploy
-
-version:
-  image: $REGISTRY_URI/factory-ci-runner:qgis-plugin-ci
-  stage: version
-  script:
-    - echo "VERSION=`make version`" > build.env
-    - echo "STATUS=`make status`" >> build.env
-    - cat build.env
-  artifacts:
-    reports:
-      dotenv: build.env
-  tags:
-    - factory-plain
 
 build:
   image: $REGISTRY_URI/factory-ci-runner:qgis-plugin-ci
   stage: build
-  dependencies:
-    - version
+  variables:
+    PRERELEASE: "--pre"
+    STATUS: unstable
+  rules:
+  - if: '$CI_COMMIT_TAG =~ /^(?:release-|v)?\d+\.\d+\.\d+(?:-.*)?$/'
+    variables:
+        VERSION_PRE: ""
+        STATUS: stable
+  - when: on_success
   script:
-    - echo "Building plugin ${PRODUCT_NAME}  VERSION=${VERSION} STATUS=${STATUS}"
-    - qgis-plugin-ci package ${VERSION}
+    - echo "Building plugin ${PRODUCT_NAME} STATUS=${STATUS}"
+    - yapt-pkg package $PRERELEASE
+    - echo "PACKAGE=`ls -1 *.zip`" > build.env
+    - echo "STATUS=$STATUS" >> build.env
+    - cat build.env  
   artifacts:
-    untracked: true
-    expose_as: "QGIS package"
+    reports:
+      dotenv: build.env
     paths:
-      - ${PRODUCT_NAME}.${VERSION}.zip
+      - "*.zip"
   tags:
     - factory-plain
 
@@ -39,12 +35,11 @@ deploy:
   image: $REGISTRY_URI/factory-ci-runner:fabric-ci
   stage: deploy
   dependencies:
-    - version
     - build
+  rules:
+    - if: $RELEASE_BRANCH == "true"
   script:
-    - upload_plugins ${PRODUCT_NAME} ${PRODUCT_NAME}.${VERSION}.zip ${STATUS}
-  variables:
-    PLUGIN_SERVER_URL: "https://qgis-plugins.3liz.org"
+    - upload_plugins ${PRODUCT_NAME} ${PACKAGE} ${STATUS}
   tags:
     - fabric
 

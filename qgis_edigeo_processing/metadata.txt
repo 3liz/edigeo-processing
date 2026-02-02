@@ -6,7 +6,7 @@ about="Allow inspect, import and export edigeo datasource."
 category=Plugins
 hasProcessingProvider=yes
 
-# Done automatically by qgis-plugin-package-ci
+# Done automatically by yapt
 #homepage=
 #tracker=
 #repository=
