@@ -15,7 +15,7 @@
 
 Dans QGIS: 
 
-* Créer un profile, et ajouter une variable PYTHONPATH  vers le repértoire
+* Créer un profile, et ajouter une variable PYTHONPATH  vers le réprtoire
   ou est installé le module.
 
 

@@ -4,7 +4,7 @@ authors = [
     { name = "3liz", email = "info@3liz.com" } 
 ]
 description="Edigeo file reader"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 keywords = ["processing", "edigeo", "cadastre", "pci"]
 #license = {text = "MIT"}
 license = "MIT"
@@ -18,9 +18,9 @@ classifiers = [
 version = "0.1.0"
 
 [project.urls]
-homepage = "https://projects.3liz.org/recherche-et-developpement/qgis-edigeo-processing-plugin"
-repository = "https://projects.3liz.org/recherche-et-developpement/qgis-edigeo-processing-plugin"
-tracker = "https://projects.3liz.org/recherche-et-developpement/qgis-edigeo-processing-plugin/issues"
+homepage = "https://github.com/3liz/edigeo-processing"
+repository = "https://github.com/3liz/edigeo-processing"
+tracker = "https://github.com/3liz/edigeo-processing"
 
 [dependency-groups]
 dev = [
