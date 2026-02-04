@@ -7,29 +7,26 @@ stages:
 
 build:
   image: $REGISTRY_URI/factory-ci-runner:qgis-plugin-ci
+  tags:
+    - factory-plain
   stage: build
-  variables:
-    PRERELEASE: "--pre"
-    STATUS: unstable
   rules:
   - if: '$CI_COMMIT_TAG =~ /^(?:release-|v)?\d+\.\d+\.\d+(?:-.*)?$/'
     variables:
-        VERSION_PRE: ""
-        STATUS: stable
-  - when: on_success
+      PRERELEASE: ""
+  - if: $RELEASE_BRANCH == "true" 
+    variables:
+      PRERELEASE: "--pre"
   script:
     - echo "Building plugin ${PRODUCT_NAME} STATUS=${STATUS}"
     - yapt-pkg package $PRERELEASE
     - echo "PACKAGE=`ls -1 *.zip`" > build.env
-    - echo "STATUS=$STATUS" >> build.env
     - cat build.env  
   artifacts:
     reports:
       dotenv: build.env
     paths:
       - "*.zip"
-  tags:
-    - factory-plain
 
 deploy:
   image: $REGISTRY_URI/factory-ci-runner:fabric-ci
@@ -37,9 +34,10 @@ deploy:
   dependencies:
     - build
   rules:
+    - if: '$CI_COMMIT_TAG =~ /^(?:release-|v)?\d+\.\d+\.\d+(?:-.*)?$/'
     - if: $RELEASE_BRANCH == "true"
   script:
-    - upload_plugins ${PRODUCT_NAME} ${PACKAGE} ${STATUS}
+    - upload_plugins ${PRODUCT_NAME} ${PACKAGE}
   tags:
     - fabric
 
