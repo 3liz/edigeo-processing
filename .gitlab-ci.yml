@@ -1,6 +1,3 @@
-variables:
-  PRODUCT_NAME: edigeo_processing
-
 stages:
   - build
   - deploy
@@ -18,7 +15,6 @@ build:
     variables:
       PRERELEASE: "--pre"
   script:
-    - echo "Building plugin ${PRODUCT_NAME} STATUS=${STATUS}"
     - yapt-pkg package $PRERELEASE
     - echo "PACKAGE=`ls -1 *.zip`" > build.env
     - cat build.env  
@@ -37,7 +33,7 @@ deploy:
     - if: '$CI_COMMIT_TAG =~ /^(?:release-|v)?\d+\.\d+\.\d+(?:-.*)?$/'
     - if: $RELEASE_BRANCH == "true"
   script:
-    - upload_plugins ${PRODUCT_NAME} ${PACKAGE}
+    - upload_plugins ${PACKAGE}
   tags:
     - fabric
 
