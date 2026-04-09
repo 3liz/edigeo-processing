@@ -26,3 +26,5 @@ experimental=True
 deprecated=False
 server=True
 supportsQt6=True
+
+plugin_dependencies=qpip

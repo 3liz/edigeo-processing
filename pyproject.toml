@@ -17,6 +17,10 @@ classifiers = [
 ]
 version = "0.1.0"
 
+dependencies = [
+    "edigeo",
+]
+
 [project.urls]
 homepage = "https://github.com/3liz/edigeo-processing"
 repository = "https://github.com/3liz/edigeo-processing"
@@ -40,6 +44,11 @@ lint = [
 
 [tool.uv.sources]
 pytest-qgis = { git = "https://github.com/3liz/pytest-qgis.git" }
+edigeo = {  index = "edigeo" }
+
+[[tool.uv.index]]
+name = "edigeo"
+url = "https://packages.3liz.org/pub/whl"
 
 #
 # Yapt
@@ -68,7 +77,8 @@ indent-style = "space"
 [tool.ruff.lint]
 extend-select = [
     "E", "F", "I", "ANN", "W", "T", "COM", "RUF",
-    "C4", "SIM", "TC", "RET",
+    "C4", "SIM", "TC", "RET", "S", "B", "PYI",
+    "PTH", "PERF", "FURB",
 ]
 # COM812 conflict with formatter
 ignore = [
@@ -86,6 +96,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
     "T201",
+    "S101",
 ]
 
 [tool.ruff.lint.isort]

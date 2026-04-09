@@ -13,7 +13,15 @@ REQUIREMENTS_GROUPS= \
 
 REQUIREMENTS=$(patsubst %, requirements/%.txt, $(REQUIREMENTS_GROUPS))
 
-update-requirements: $(REQUIREMENTS)
+update-requirements: $(REQUIREMENTS) requirements.txt
+
+requirements.txt: uv.lock
+	@echo "Updating plugin requirements"; \
+	uv export --format requirements.txt \
+		--no-annotate \
+		--no-editable \
+		--no-hashes \
+		--no-dev -q -o $@
 
 requirements/%.txt: uv.lock
 	@echo "Updating requirements for '$*'"; \
