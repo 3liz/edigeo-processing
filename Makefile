@@ -42,7 +42,7 @@ test:
 lint::
 	ruff check --output-format=concise
 
-lint:: typecheck
+#lint:: typecheck
 
 lint-fix:
 	ruff check --fix

@@ -81,7 +81,11 @@ class EdigeoInspect(QgsProcessingAlgorithm):
 
         output_dir = Path(self.parameterAsString(parameters, self.OUTPUT_FOLDER, context))
         if not output_dir.is_dir():
-            raise QgsProcessingAlgorithm(f"Repertoire invalide {output_dir}")
+            # Create the directory if it doesn't exists
+            try:
+                output_dir.mkdir()
+            except Exception as err:
+                raise QgsProcessingException(f"{output_dir}: {err}") from None
 
         parser = read_from_archive(file)
 

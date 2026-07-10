@@ -1,12 +1,13 @@
 [general]
 name=Edigeo-processing
 qgisMinimumVersion=3.34
-qgisMaximumVersion=3.99
+qgisMaximumVersion=4.99
 about="Allow inspect, import and export edigeo datasource."
 category=Plugins
 hasProcessingProvider=yes
 
 # Done automatically by yapt
+version=dev
 #homepage=
 #tracker=
 #repository=
@@ -14,7 +15,6 @@ hasProcessingProvider=yes
 #author=
 #email=
 #description=
-#version=dev
 #commitNumber=
 #commitSha1=
 #dateTime=
